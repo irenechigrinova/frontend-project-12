@@ -1,3 +1,6 @@
+@import "assets/colors";
+@import '~bootstrap/scss/bootstrap';
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -5,9 +8,14 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: $main100;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.btn-outline-primary {
+  @include button-outline-variant($main60, #222222, lighten($main60,5%), $main60);
 }
