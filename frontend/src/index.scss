@@ -17,6 +17,6 @@ code {
     monospace;
 }
 
-.btn-outline-primary {
-  @include button-outline-variant($main60, #222222, lighten($main60,5%), $main60);
+.hv-100 {
+  height: 100vh;
 }

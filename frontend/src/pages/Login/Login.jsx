@@ -1,17 +1,18 @@
 import { useFormik } from 'formik';
-import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import * as yup from 'yup';
 import { Button, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { login } from '../../store/entities/user/user.thunk';
 
 import avatar from '../../assets/avatar.jpg';
 
 import styles from './Login.module.scss';
 
-import { loginApi } from '../../api/auth';
-
-import { AppContext } from '../../context/AppContext';
+import { API_STATUS } from '../../utils/constants';
 
 const VALIDATION_SCHEMA = yup.object().shape({
   username: yup.string().required(),
@@ -19,8 +20,9 @@ const VALIDATION_SCHEMA = yup.object().shape({
 });
 
 const Login = () => {
-  const { login } = useContext(AppContext);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loadingStatus, error } = useSelector((state) => state.user);
 
   const formik = useFormik({
     initialValues: {
@@ -31,22 +33,23 @@ const Login = () => {
     validateOnChange: false,
     enableReinitialize: false,
     validationSchema: VALIDATION_SCHEMA,
-    onSubmit: async (values) => {
-      try {
-        const data = await loginApi(values);
-        login(data);
-        navigate('/');
-      } catch (e) {
-        const { response } = e;
-        const message = response.status === 401 ? 'Неверные данные' : e.message;
-        toast.error(message);
-        formik.setErrors({
-          username: 'Неверный ник',
-          password: 'Неверный пароль',
-        });
-      }
-    },
+    onSubmit: async (values) => dispatch(login(values)),
   });
+
+  useEffect(() => {
+    if (loadingStatus === API_STATUS.succeeded) navigate('/');
+    if (loadingStatus === API_STATUS.failed) {
+      const message =
+        error.status === 401 || error.message?.includes('401')
+          ? 'Неверные данные'
+          : error.message;
+      toast.error(message);
+      formik.setErrors({
+        username: 'Неверный ник',
+        password: 'Неверный пароль',
+      });
+    }
+  }, [loadingStatus, error]);
 
   return (
     <div className={styles.login}>
